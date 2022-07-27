@@ -25,7 +25,8 @@ import com.axisbank.project2.security.jwt.JwtUtils;
 import com.axisbank.project2.payload.*;
 import com.axisbank.project2.model.*;
 import com.axisbank.project2.UserDetailsImpl;
-@CrossOrigin(origins = "*", maxAge = 3600)
+//@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin("http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

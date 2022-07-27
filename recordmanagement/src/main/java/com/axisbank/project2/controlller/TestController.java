@@ -18,7 +18,7 @@ import com.axisbank.project2.model.Role;
 import com.axisbank.project2.model.User;
 import com.axisbank.project2.repository.RoleRepository;
 import com.axisbank.project2.repository.UserRepository;
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin("http://localhost:3000")
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
@@ -55,7 +55,7 @@ public class TestController {
 	@PutMapping("/updateOtherUserRole")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> updateOtherUserRole(@RequestBody SignupRequest request) {
-		
+		System.out.println("hit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if(userRepository.existsByUsername(request.getUsername())) {
 			
 			 User updatedUser = userRepository.findByUsername(request.getUsername()).get();
