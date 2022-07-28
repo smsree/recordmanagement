@@ -1,4 +1,4 @@
-package com.axisbank.project2.service;
+/*package com.axisbank.project2.service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-@Service
+//@Service
 public class FilesStorageServiceImpl implements FilesStorageService {
 
   private final Path root = Paths.get("uploads");
@@ -66,4 +66,4 @@ public class FilesStorageServiceImpl implements FilesStorageService {
     }
   }
 
-}
+}*/

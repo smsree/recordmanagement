@@ -1,4 +1,4 @@
-package com.axisbank.project2.service;
+/*package com.axisbank.project2.service;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -16,4 +16,4 @@ public interface FilesStorageService {
   public void deleteAll();
 
   public Stream<Path> loadAll();
-}
+}*/
