@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,12 +36,18 @@ public class StorageService {
 	@Value("${application.bucket.name}")
     private String bucketName;
 	
+	@Value("${application.bucket.optional.name}")
+	private String optionalBucketName;
+	
 	private EncryptDecrypt aes=new EncryptDecrypt();
 	
 	private static final Logger log = LoggerFactory.getLogger(StorageService.class);
 	
     @Autowired
     private AmazonS3 s3Client;
+    
+    @Autowired
+    private AmazonS3 s3ClientOptional;
 
     public String uploadFile(MultipartFile file) {
         File fileObj = convertMultiPartFileToFile(file);
@@ -70,6 +77,28 @@ public class StorageService {
 		}
     	return "File uploaded : "+ fileName;
     }
+    
+    public String uploadEncryptedReport(File file) {
+    	File fileObj = file;
+    	String fileName=file.getName();
+    	try {
+			FileInputStream fis =new FileInputStream(fileObj);
+			String encrypt=aes.encryptFile(fis);
+			FileOutputStream fos=new FileOutputStream(fileObj);
+			byte[] data= encrypt.getBytes();
+			fos.write(data);
+			s3ClientOptional.putObject(new PutObjectRequest(optionalBucketName, fileName, fileObj));
+	        fileObj.delete();
+		} catch (FileNotFoundException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return "File uploaded : "+ fileName;
+    	
+    }
 
 
     public byte[] downloadFile(String fileName) {
@@ -87,8 +116,9 @@ public class StorageService {
     public byte[] downloadDecryptFile(String fileName) {
     	 S3Object s3Object = s3Client.getObject(bucketName, fileName);
          S3ObjectInputStream inputStream = s3Object.getObjectContent();
+         BufferedInputStream bis=new BufferedInputStream(inputStream);
          try {
-			byte[] content = IOUtils.toByteArray(inputStream);
+			byte[] content = IOUtils.toByteArray(bis);
 			return aes.decryptByteArray(content);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -100,16 +130,43 @@ public class StorageService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-         return null;
-       
-             
+         return null;        
     }
+    
+    public byte[] downloadDecryptReport(String fileName) {
+   	 S3Object s3Object = s3ClientOptional.getObject(optionalBucketName, fileName);
+        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+        BufferedInputStream bis=new BufferedInputStream(inputStream); 
+        try {
+			byte[] content = IOUtils.toByteArray(bis);
+			return aes.decryptByteArray(content);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return null;
+      
+            
+   }
 
 
     public String deleteFile(String fileName) {
         s3Client.deleteObject(bucketName, fileName);
         return fileName + " removed ...";
     }
+    
+    public String deleteReport(String fileName) {
+        s3ClientOptional.deleteObject(optionalBucketName, fileName);
+        return fileName + " removed ...";
+    }
+    
+    
 
 
     private File convertMultiPartFileToFile(MultipartFile file) {
@@ -129,4 +186,11 @@ public class StorageService {
       return  listObjectsV2Result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
 
     }
+    
+    public List<String> listAllReports() {
+
+        ListObjectsV2Result listObjectsV2Result = s3ClientOptional.listObjectsV2(optionalBucketName);
+      return  listObjectsV2Result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
+    }
+    
 }

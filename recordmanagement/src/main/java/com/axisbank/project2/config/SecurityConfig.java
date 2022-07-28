@@ -20,6 +20,15 @@ public class SecurityConfig {
     @Value("${cloud.aws.region.static}")
     private String region;
     
+    @Value("${cloud.aws.credentials.access-key}")
+	private String accessKeyOptional;
+	
+	@Value("${cloud.aws.credentials.secret-key}")
+    private String accessSecretOptional;
+	
+	 @Value("${cloud.aws.region.static.optional}")
+	 private String regionOptional;
+    
     @Bean
     public AmazonS3 s3Client() {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);
@@ -27,6 +36,15 @@ public class SecurityConfig {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(region).build();
     }
+    
+    @Bean
+	 public AmazonS3 s3ClientOptional() 
+	 {
+	        AWSCredentials credentials = new BasicAWSCredentials(accessKeyOptional, accessSecretOptional);
+	        return AmazonS3ClientBuilder.standard()
+	                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+	                .withRegion(regionOptional).build();
+	    }
 	
 	
 
